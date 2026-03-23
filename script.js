@@ -46,7 +46,6 @@ const books = [
 ];
 
 /* Snack 1 - Filtra e Modifica
-Crea una funzione che somma due numeri.
 Crea un array (longBooks) con i libri che hanno più di 300 pagine;
 Creare un array (longBooksTitles) che contiene solo i titoli dei libri contenuti in longBooks.
 Stampa in console ogni titolo nella console. */
@@ -66,17 +65,18 @@ const availableBooks = books.filter((b) => b.available);
 console.log(availableBooks);
 
 const discountedBooks = availableBooks.map((a) => {
-  const price = parseInt(a.price);
-  const discountedPrice = price - (price * 20) / 100;
-  const newPrice = discountedPrice.toFixed(2).replace(".00", "");
+  const price = parseFloat(a.price.replace("€", ""));
+  const discountedPrice = (price * 0.8).toFixed(2);
+  const newPrice = discountedPrice.replace(".00", "");
   return { ...a, price: `${newPrice}€` };
 });
 
 console.log(discountedBooks);
 
-const fullPricedBook = discountedBooks.find((d) =>
-  Number.isInteger(parseFloat(d.price)),
-);
+const fullPricedBook = discountedBooks.find((d) => {
+  const price = parseFloat(d.price.replace("€", ""));
+  return Number.isInteger(price);
+});
 
 console.log(fullPricedBook);
 
@@ -89,13 +89,11 @@ Ordina l’array authors in base all’età, senza creare un nuovo array.
 
 const authors = books.map((b) => b.author);
 
-const areAuthorsAdult = authors.every((a) => a.age > 18);
+const areAuthorsAdult = authors.every((a) => a.age >= 18);
 
 console.log(areAuthorsAdult);
 
-authors.sort((a, b) => {
-  return areAuthorsAdult ? a.age - b.age : b.age - a.age;
-});
+authors.sort((a, b) => (a.age - b.age) * (areAuthorsAdult ? 1 : -1));
 
 console.log(authors);
 
@@ -140,20 +138,26 @@ Ordina l’array booksByPrice in base alla disponibilità (prima quelli disponib
 const areThereAvailableBooks = books.some((b) => b.available);
 console.log(areThereAvailableBooks);
 
-const booksByPrice = books.sort(
+const booksByPrice = [...books].sort(
   (a, b) => parseFloat(a.price) - parseFloat(b.price),
 );
 
 console.log(booksByPrice);
 
-booksByPrice.sort((a, b) => b.available - a.available);
+booksByPrice.sort((a, b) =>
+  a.available === b.available ? 0 : a.available ? -1 : 1,
+);
 
 /* Snack 7 (Bonus) - Analizza i tag
 Usa reduce per creare un oggetto (tagCounts) che conta quante volte ogni tag viene usato tra i libri. */
 
 const tagCounts = books.reduce((acc, b) => {
   b.tags.forEach((tag) => {
-    acc[tag] = (acc[tag] || 0) + 1;
+    if (acc[tag]) {
+      acc[tag]++;
+    } else {
+      acc[tag] = 1;
+    }
   });
   return acc;
 }, {});
